@@ -109,7 +109,23 @@ int _tmain(int argc, _TCHAR* argv[])
 	/* Write value data (bData) to the requested file */
 	DWORD dBytesWritten;
 	HANDLE hFile = CreateFile(argv[3], GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	WriteFile(hFile, bData, dValueSize, &dBytesWritten, NULL);
+
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		printf("Error: Cannot open handle to specified file\n");
+
+		CloseHandle(hFile);
+		return -1;
+	}
+
+	if (!WriteFile(hFile, bData, dValueSize, &dBytesWritten, NULL))
+	{
+		printf("Error: Cannot write data to specified file\n");
+
+		CloseHandle(hFile);
+		return -1;
+	}
+
 	CloseHandle(hFile);
 
 	/* Inform user that action has been successfully completed */
