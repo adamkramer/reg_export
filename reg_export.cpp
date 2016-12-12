@@ -29,7 +29,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		printf("This program exports the raw content of a registry value to a file\n");
 		printf("Usage: reg_export.exe <registry key> <value name> <file>\n");
-		printf("[ Example: reg_export.exe KEY_CURRENT_USER\\Console CursorSize C:\\output.raw ]\n\n");
+		printf("[ Example: reg_export.exe HKEY_CURRENT_USER\\Console CursorSize C:\\output.raw ]\n\n");
 		printf("N.B. If you want the default value for a subkey, enter the value name (default)\n");
 
 		return -1;
@@ -47,15 +47,20 @@ int _tmain(int argc, _TCHAR* argv[])
 	CharUpper(wRegKey);
 
 	/* Identify which registry key is being requested */
-	if (wcsstr(wRegKey, L"HKEY_CLASSES_ROOT"))
+	if ((wRegKey == wcsstr(wRegKey, L"HKEY_CLASSES_ROOT")) ||
+			(wRegKey == wcsstr(wRegKey, L"HKCR")))
 		hKey = HKEY_CLASSES_ROOT;
-	else if (wcsstr(wRegKey, L"HKEY_CURRENT_CONFIG"))
+	else if ((wRegKey == wcsstr(wRegKey, L"HKEY_CURRENT_CONFIG")) ||
+			(wRegKey == wcsstr(wRegKey, L"HKCC")))
 		hKey = HKEY_CURRENT_CONFIG;
-	else if (wcsstr(wRegKey, L"HKEY_CURRENT_USER"))
+	else if ((wRegKey == wcsstr(wRegKey, L"HKEY_CURRENT_USER")) ||
+			(wRegKey == wcsstr(wRegKey, L"HKCU")))
 		hKey = HKEY_CURRENT_USER;
-	else if (wcsstr(wRegKey, L"HKEY_LOCAL_MACHINE"))
+	else if ((wRegKey == wcsstr(wRegKey, L"HKEY_LOCAL_MACHINE")) ||
+			(wRegKey == wcsstr(wRegKey, L"HKLM")))
 		hKey = HKEY_LOCAL_MACHINE;
-	else if (wcsstr(wRegKey, L"HKEY_USERS"))
+	else if ((wRegKey == wcsstr(wRegKey, L"HKEY_USERS")) ||
+			(wRegKey == wcsstr(wRegKey, L"HKU")))
 		hKey = HKEY_USERS;
 	else { 
 		printf("Error: Argument 1 does not appear to be a registry key\n"); 
@@ -133,4 +138,3 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	return 0;
 }
-
