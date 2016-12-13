@@ -35,6 +35,12 @@ int _tmain(int argc, _TCHAR* argv[])
 		return -1;
 	}
 
+	for (int i = 1; i < argc; i++)
+		if (!wcslen(argv[i]))
+		{
+			printf("Error: One of the arguments has length zero\n");
+			return -1;
+		}
 	
 	/* SECTION 2 - Read data from registry key */
 	
@@ -69,6 +75,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	/* Split subkey out into "wSubKey" */
 	wchar_t* wSubKey = wcschr(wRegKey, L'\\');
+
+	if (!wSubKey) {
+		printf("Error: Invalid registry key\n");
+		return -1;
+	}
+
 	wSubKey++;
 
 	/* dValueSize will store size of requested value data */
