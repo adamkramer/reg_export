@@ -76,12 +76,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	/* Split subkey out into "wSubKey" */
 	wchar_t* wSubKey = wcschr(wRegKey, L'\\');
 
-	if (!wSubKey) {
-		printf("Error: Invalid registry key\n");
-		return -1;
-	}
-
-	wSubKey++;
+	/* Only wSubKey is NULL, this indicates no subkey - leave as NULL - 
+		else move pointer to start of subkey */
+	if (wSubKey)
+		wSubKey++;
 
 	/* dValueSize will store size of requested value data */
 	DWORD dValueSize;
