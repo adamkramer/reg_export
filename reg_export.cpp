@@ -17,12 +17,13 @@ Created by Adam Kramer [2016] - Email: adamkramer at hotmail dot com */
 #include "stdio.h"
 #include "windows.h"
 
+#define VERSION "1.3"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 
 	/*  SECTION 1 - Check arguments are valid, else display welcome message */
-	printf("      *** reg_export v1.4 - Created by Adam Kramer [2016] ***\n");
+	printf("      *** reg_export v%s - Created by Adam Kramer [2016] ***\n", VERSION);
 	printf("-----------------------------------------------------------\n");
 
 	if (argc < 4) {
