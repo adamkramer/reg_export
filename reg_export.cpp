@@ -22,16 +22,17 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 
 	/*  SECTION 1 - Check arguments are valid, else display welcome message */
-	printf("      *** reg_export - Created by Adam Kramer [2016] ***\n");
+	printf("      *** reg_export v1.4 - Created by Adam Kramer [2016] ***\n");
 	printf("-----------------------------------------------------------\n");
 
 	if (argc < 4) {
 
-		printf("This program exports the raw content of a registry value to a file\n");
-		printf("Usage: reg_export.exe <registry key> <value name> <file>\n");
-		printf("[ Example: reg_export.exe HKEY_CURRENT_USER\\Console CursorSize C:\\output.raw ]\n\n");
-		printf("N.B. If you want the default value for a subkey, enter the value name (default)\n");
-
+		printf("This program exports the raw content of a registry value to a file\n\n");
+		printf("Usage: reg_export.exe <registry key> <value name> <file> [/32node]\n");
+		printf("E.g. reg_export.exe HKEY_CURRENT_USER\\Console CursorSize C:\\output.raw /32node\n\n");
+		printf("Additional information:\n");
+		printf("#1. If you want the default value for a subkey, enter the value name (default)\n");
+		printf("#2. Appending /32node can be used to request values from 32 bit registry node\n");
 		return -1;
 	}
 
@@ -41,9 +42,15 @@ int _tmain(int argc, _TCHAR* argv[])
 			printf("Error: One of the arguments has length zero\n");
 			return -1;
 		}
+
+	/* Determine if user wishes to access the 32bit registry node */
+	bool b32node = FALSE;
+	if (argc > 4)
+		if (!_wcsicmp(argv[4], L"/32node"))
+			b32node = TRUE;
 	
 	/* SECTION 2 - Read data from registry key */
-	
+
 	/* Variables for registry key & handle */
 	HKEY hKey, phKey;
 
@@ -94,9 +101,20 @@ int _tmain(int argc, _TCHAR* argv[])
 		wValue = NULL;
 
 	/* Open handle to registry key - phKey will hold handle */
-	if (RegOpenKeyEx(hKey, wSubKey, 0, KEY_READ, &phKey))
+	if (RegOpenKeyEx(hKey, wSubKey, 0, (b32node ? KEY_READ | KEY_WOW64_32KEY : KEY_READ), &phKey))
 	{
 		printf("Error: Cannot open handle to registry key\n");
+
+		/* Check if they key/value pair exists on the other node (i.e. 32bit if we're looking at 64bit and vice versa) */
+		if (!RegOpenKeyEx(hKey, wSubKey, 0, (b32node ? KEY_READ : KEY_READ | KEY_WOW64_32KEY), &phKey))
+			if (!RegQueryValueEx(phKey, wValue, NULL, NULL, NULL, &dValueSize))
+				printf("[HINT] You requested the %s and key/value pair was not found\n"
+				"\tHowever, a key/value pair was detected on the %s\n"
+				"\t** Try running with the /32node argument appended **",
+							(b32node ? "32 bit node" : "64 bit node"),
+							(!b32node ? "32 bit node" : "64 bit node"),
+							(b32node ? "WITHOUT" : "WITH"));
+
 		return -1;
 	}
 
@@ -104,6 +122,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (RegQueryValueEx(phKey, wValue, NULL, NULL, NULL, &dValueSize))
 	{
 		printf("Error: Cannot obtain size of requested registry value\n");
+
+		/* Check if they key/value pair exists on the other node (i.e. 32bit if we're looking at 64bit and vice versa) */
+		CloseHandle(hKey);
+		if (!RegOpenKeyEx(hKey, wSubKey, 0, (b32node ? KEY_READ : KEY_READ | KEY_WOW64_32KEY), &phKey))
+			if (!RegQueryValueEx(phKey, wValue, NULL, NULL, NULL, &dValueSize))
+				printf("[HINT] You requested the %s and key/value pair was not found\n"
+				"\tHowever, a key/value pair was detected on the %s\n"
+				"\t** Try running %s the /32node argument appended **",
+				(b32node ? "32 bit node" : "64 bit node"),
+				(!b32node ? "32 bit node" : "64 bit node"),
+				(b32node ? "WITHOUT" : "WITH"));
+
 		return -1;
 	}
 
